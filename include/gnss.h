@@ -1,3 +1,5 @@
 /*
 Handles reading directly from the GPS with declarations to make stuff public
 */
+
+#pragma once
