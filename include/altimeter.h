@@ -3,19 +3,30 @@ altimeter stuff
 */
 
 #pragma once
+
+#include <cstdint>
+
+#include <Adafruit_BMP280.h>
+
 #include "sensor_universal.h"
 
-#define BMP280_ADDRESS 0x76 // When SDO connected to GND, 0x77 when connected to V_DDIO - MUST BE CONNECTED TO SOMETHING
+// Scanner detected at 0x7E, but 0x76 working???
+static constexpr std::uint8_t ALTIMETER_BMP280_ADDRESS = 0x76; 
 
 class Altimeter
 {
     private:
-        SensorStatus status;
+        // Sensor
         Adafruit_BMP280 bmp;
-        uint8_t consecutiveFailures;    // helper to count how many status checks failed
-        uint8_t consecutiveSuccesses;   // helper to count how many status checks succeeded
-        static const uint8_t FAILURE_THRESHOLD = 4;     // 40ms at 100Hz
-        static const uint8_t RECOVERY_THRESHOLD = 18;    // 180ms at 100Hz
+
+        // Meta
+        SensorStatus status;
+        std::uint8_t consecutiveSuccesses; // helper to count how many status checks succeeded
+        std::uint8_t consecutiveFailures;    // helper to count how many status checks failed
+        static constexpr std::uint8_t FAILURE_THRESHOLD = 8;     // 40ms at 100Hz
+        static constexpr std::uint8_t RECOVERY_THRESHOLD = 6;    // 60ms at 100Hz
+        static constexpr std::uint8_t DEGRADE_THRESHOLD = 4;      // 40ms at 100Hz
+        static constexpr std::uint8_t FULL_RECOVERY_THRESHOLD = 16;      // 160ms at 100Hz
 
     public:
         // constructor declaration
