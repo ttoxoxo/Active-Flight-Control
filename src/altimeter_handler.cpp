@@ -2,6 +2,9 @@
 #include <SPI.h>
 #include <altimeter.h>
 
+// Scanner detected at 0x7E, but 0x76 working???
+static constexpr auto ALTIMETER_BMP280_ADDRESS = 0x76;
+
 // Constructor
 Altimeter::Altimeter()
     : bmp(&Wire2), status(SensorStatus::UNINITIALIZED), consecutiveSuccesses(0), consecutiveFailures(0)
@@ -13,6 +16,12 @@ bool Altimeter::begin()
 {
     bool ok = bmp.begin(ALTIMETER_BMP280_ADDRESS);
     status = ok ? SensorStatus::NOMINAL : SensorStatus::FAILED;
+    // Parameters: mode, temp oversampling, pressure oversampling, filter, standby time
+    bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,
+                    Adafruit_BMP280::SAMPLING_X1,   // Temperature
+                    Adafruit_BMP280::SAMPLING_X1,  // Pressure
+                    Adafruit_BMP280::FILTER_OFF,    // <--- IIR Filter Disabled
+                    Adafruit_BMP280::STANDBY_MS_1); // Standby time
     return ok;
 }
 

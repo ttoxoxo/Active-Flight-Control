@@ -10,8 +10,7 @@ altimeter stuff
 
 #include "sensor_universal.h"
 
-// Scanner detected at 0x7E, but 0x76 working???
-static constexpr std::uint8_t ALTIMETER_BMP280_ADDRESS = 0x76; 
+
 
 class Altimeter
 {

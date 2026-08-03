@@ -4,22 +4,63 @@
 #include "config.h"
 #include "altimeter.h"
 #include "imu.h"
+#include "gnss.h"
 
+// Globals
+// Objects/Structs
 Altimeter alti = Altimeter();
 Imu imu = Imu();
+GNSS gnss = GNSS();
+GnssData gnss_data;
+
+// Sensor global data
+// // Altimeter
 float seaLevelPressurehPa;
 float seaLevelPressurePa;
+float rawPressurePa;
+float pressurehPa;
+
+// General Servicing
+unsigned long loopCount = 0;
+// // Timing State
+unsigned long lastSensorTick = 0;
+unsigned long lastPrintTime = 0;
+constexpr unsigned long SENSOR_TICK_MS = 20;      // ~50Hz — comfortably faster than GNSS's 10Hz output,
+                                                  // fast enough to drain GNSS_SERIAL before it backs up,
+                                                  // slow enough that threshold tuning stays sane
+constexpr unsigned long PRINT_INTERVAL_MS = 1000; // debug cadence, independent of sensor servicing
 
 void setup()
 {
-    Serial.begin(DEBUG_BAUD);
 
-    while (!Serial && millis() < 4000)
-    {
-        // Give the USB serial monitor a moment to attach after upload/reset.
+    Serial.begin(DEBUG_BAUD);
+    GNSS_SERIAL.begin(GNSS_BAUD);
+    Serial3.begin(DEBUG_BAUD);
+
+    uint32_t bootTime = micros();
+    uint8_t bootSecondCount = 5;
+
+    // Wait for serial debug if not initiated
+    while(!Serial){
+
     }
 
-    Serial.println("Entered Setup!");
+    // General wake-up window
+    while ((micros()-bootTime) < BOOT_SEQ_DELAY)
+    {
+        // Give the USB serial monitor a moment to attach after upload/reset.
+        Serial.print(bootSecondCount);
+        delay(200);
+        Serial.print(".");
+        delay(200);
+        Serial.print(".");
+        delay(200);
+        Serial.print(". ");
+        bootSecondCount--;
+        delay(400);
+    }
+
+    Serial.println("\n\n--------------\nEntered Setup!\n--------------\n");
 
     // Activate I2C lines - some libraries do it, but preemptive activation ensures that they work
     Wire.begin(); 
@@ -27,7 +68,7 @@ void setup()
     Wire2.begin();
 
     // Altimeter
-    Serial.println(alti.begin() ? "Detected and Started" : "Failed");
+    Serial.println(alti.begin() ? "Altimeter Detected and Started" : "Failed");
 
     // Assumed to be on ground during setup
     Serial.println("\nAltimeter Pressure Reading:");
@@ -39,27 +80,65 @@ void setup()
     Serial.println("\nIMU:");
     Serial.println(imu.begin() ? "Detected and Started" : "Failed");
     Serial.println(imu.configureForFlight() ? "Configured for flight" : "Configuration failed");
+
+    Serial.println("\nGNSS:"); // RUNS AT 10 hz
     
-    Serial.println("SETUP ENDED\n---\n");
+    if(!gnss.begin()){
+        Serial.println("GNSS UNAVAILABLE");
+    };
+
+    Serial.println("\n-----------\nSETUP ENDED\n-----------\n\n-------------------------------------------\n\n");
 }
 
 void loop()
 {
+    // GNSS_SERIAL.write(0x55); // arbitrary test byte
+    // delay(500);
+    // while (GNSS_SERIAL.available())
+    // {
+    //     Serial.println(GNSS_SERIAL.read(), HEX);
+    // }
+    // while (GNSS_SERIAL.available())
+    // {
+    //     uint8_t b = GNSS_SERIAL.read();
+    //     if (b < 0x10)
+    //         Serial.print("0");
+    //     Serial.print(b, HEX);
+    //     Serial.print(" ");
+    // }
+    // Serial.println();
+    // Serial3.write(0x55); // arbitrary test byte
+    // delay(500);
+    // while (Serial3.available())
+    // {
+    //     Serial.println(Serial3.read(), HEX);
+    // }
 
-    Serial.println("Altimeter Health Check:");
+    Serial.print("Loop: ");
+    Serial.println(loopCount);
+    Serial.println("\n1. Altimeter Health Check:");
     printStatus(alti.checkHealth());
 
-    Serial.println("\nAltimeter Temperature Reading:");
+    Serial.print("\nAltimeter Temperature Reading: ");
     Serial.println(alti.getTemperature());
 
-    Serial.println("\nAltimeter Altitude Reading:");
+    Serial.print("\nSealevel Pressure Reading (hPa): ");
+    Serial.println(seaLevelPressurehPa);
+    rawPressurePa = alti.getPressure();
+    pressurehPa = rawPressurePa / 100;
+    Serial.print("Pressure in Pa: ");
+    Serial.print(rawPressurePa);
+    Serial.print("\nPressure in hPa: ");
+    Serial.print(pressurehPa);
+
+    Serial.print("\nAltimeter Altitude Reading: ");
     Serial.println(alti.getAltitude(seaLevelPressurehPa));
 
     Serial.println("\n---\n");
 
     // ---- IMU ----
     
-    Serial.println("IMU Health Check:");
+    Serial.println("2. IMU Health Check:");
     printStatus(imu.checkHealth());
     
     Imu::RawSample raw = imu.getRawSample();
@@ -106,6 +185,14 @@ void loop()
     Serial.println(imu.isGyroNearLimit() ? "YES" : "no");
 
     Serial.println("\n---\n");
-    
+
+    Serial.println("3. GNSS Status: ");
+    printStatus(gnss.checkHealth());
+    Serial.println(); // formatting
+    gnss_data = gnss.getData(gnss_data);
+    gnss_data.print();
+
+    Serial.println("\n-------------------------------------------\n");
+
     delay(1000);
 }

@@ -4,7 +4,10 @@ pin defs, constants, baud rates, PID gains
 
 #pragma once
 
-static constexpr HardwareSerial &GNSS_SERIAL = Serial3; // Serial3: TX3=14, RX3=15
+// GPS
+static constexpr HardwareSerial &GNSS_SERIAL = Serial7; // Serial7: TX7=29, RX7=28
+static constexpr HardwareSerial &RADIO_SERIAL = Serial3; // Serial3: TX3=14, RX7=15
+static constexpr int BOOT_SEQ_DELAY = 5000; // in ms
 
 // pins
 // Servos - fins (through raceway to lower stage)
@@ -13,9 +16,6 @@ constexpr int SERVO2_PIN = 3;
 constexpr int SERVO3_PIN = 4;
 constexpr int SERVO4_PIN = 5;
 constexpr int PYRO_PIN = 6; // gate drive to MOSFET, not direct pyro power — TBD later
-
-// GPS
-//constexpr int GNSS_SERIAL = Serial3; // Serial3: TX3=14, RX3=15
 
 // Radio
 constexpr int RADIO_SERIAL = 5; // Serial5: RX5=20, TX5=21
