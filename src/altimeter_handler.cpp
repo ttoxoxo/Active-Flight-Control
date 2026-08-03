@@ -1,13 +1,14 @@
 #include <Wire.h>
 #include <SPI.h>
 #include <altimeter.h>
+#include <config.h>
 
 // Scanner detected at 0x7E, but 0x76 working???
 static constexpr auto ALTIMETER_BMP280_ADDRESS = 0x76;
 
 // Constructor
 Altimeter::Altimeter()
-    : bmp(&Wire2), status(SensorStatus::UNINITIALIZED), consecutiveSuccesses(0), consecutiveFailures(0)
+    : bmp(&ALTI_WIRE), status(SensorStatus::UNINITIALIZED), consecutiveSuccesses(0), consecutiveFailures(0)
 {
 }
 
@@ -27,8 +28,8 @@ bool Altimeter::begin()
 
 SensorStatus Altimeter::checkHealth()
 {
-    Wire2.beginTransmission(ALTIMETER_BMP280_ADDRESS);
-    bool ack = (Wire2.endTransmission() == 0);
+    ALTI_WIRE.beginTransmission(ALTIMETER_BMP280_ADDRESS);
+    bool ack = (ALTI_WIRE.endTransmission() == 0);
 
     if (ack)
     {

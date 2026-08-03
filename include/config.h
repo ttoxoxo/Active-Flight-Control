@@ -21,10 +21,11 @@ inline constexpr HardwareSerial &RADIO_SERIAL = Serial5; // Serial5: TX5=20, RX5
 inline constexpr int RADIO_M0_PIN = 22;
 inline constexpr int RADIO_M1_PIN = 23;
 
+
 // I2C buses — avionics bay, one sensor per bus (no contention)
-// Wire  (SDA=18, SCL=19) -> LSM6DSO IMU
-// Wire1 (SDA=17, SCL=16) -> MLX90393 magnetometer
-// Wire2 (SDA=25, SCL=24) -> BMP280 altimeter   // TODO: verify SDA/SCL order against PJRC pinout card before soldering
+inline constexpr TwoWire &IMU_WIRE = Wire;   // SDA=18, SCL=19 -> LSM6DSO IMU
+inline constexpr TwoWire &MAG_WIRE = Wire1;  // SDA=17, SCL=16 -> MLX90393 magnetometer
+inline constexpr TwoWire &ALTI_WIRE = Wire2; // SDA=25, SCL=24 -> BMP280 altimeter
 
 // constexpr int STATUS_LED_PIN = 13;  // Basic Debug
 
@@ -39,3 +40,11 @@ inline constexpr double YAW_KP = 2.0, YAW_KI = 0.0, YAW_KD = 0.2;
 inline constexpr long GNSS_BAUD = 38400;
 inline constexpr long RADIO_BAUD = 9600; // check your E32 model's default, adjust if different
 inline constexpr long DEBUG_BAUD = 115200;
+
+/*
+CODE SCRAPS
+// I2C buses — avionics bay, one sensor per bus (no contention)
+// Wire  (SDA=18, SCL=19) -> LSM6DSO IMU
+// Wire1 (SDA=17, SCL=16) -> MLX90393 magnetometer
+// Wire2 (SDA=25, SCL=24) -> BMP280 altimeter   // TODO: verify SDA/SCL order against PJRC pinout card before soldering
+*/

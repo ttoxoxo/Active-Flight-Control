@@ -25,28 +25,26 @@ unsigned long loopCount = 0;
 // // Timing State
 unsigned long lastSensorTick = 0;
 unsigned long lastPrintTime = 0;
-constexpr unsigned long SENSOR_TICK_MS = 20;      // ~50Hz — comfortably faster than GNSS's 10Hz output,
-                                                  // fast enough to drain GNSS_SERIAL before it backs up,
-                                                  // slow enough that threshold tuning stays sane
+constexpr unsigned long SENSOR_TICK_MS = 20; // ~50Hz — comfortably faster than GNSS's 10Hz output,
+                                             // fast enough to drain GNSS_SERIAL before it backs up, slow enough that threshold tuning stays sane
 constexpr unsigned long PRINT_INTERVAL_MS = 1000; // debug cadence, independent of sensor servicing
 
-void setup()
+void wakeUp()
 {
-
     Serial.begin(DEBUG_BAUD);
     GNSS_SERIAL.begin(GNSS_BAUD);
-    Serial3.begin(DEBUG_BAUD);
+    RADIO_SERIAL.begin(RADIO_BAUD);
 
     uint32_t bootTime = micros();
     uint8_t bootSecondCount = 5;
 
     // Wait for serial debug if not initiated
-    while(!Serial){
-
+    while (!Serial)
+    {
     }
 
     // General wake-up window
-    while ((micros()-bootTime) < BOOT_SEQ_DELAY)
+    while ((micros() - bootTime) < BOOT_SEQ_DELAY)
     {
         // Give the USB serial monitor a moment to attach after upload/reset.
         Serial.print(bootSecondCount);
@@ -60,13 +58,14 @@ void setup()
         delay(400);
     }
 
-    Serial.println("\n\n--------------\nEntered Setup!\n--------------\n");
-
     // Activate I2C lines - some libraries do it, but preemptive activation ensures that they work
-    Wire.begin(); 
+    Wire.begin();
     Wire1.begin();
     Wire2.begin();
+}
 
+void sensorStartup()
+{
     // Altimeter
     Serial.println(alti.begin() ? "Altimeter Detected and Started" : "Failed");
 
@@ -81,39 +80,16 @@ void setup()
     Serial.println(imu.begin() ? "Detected and Started" : "Failed");
     Serial.println(imu.configureForFlight() ? "Configured for flight" : "Configuration failed");
 
-    Serial.println("\nGNSS:"); // RUNS AT 10 hz
-    
-    if(!gnss.begin()){
+    // GNSS runs at 10Hz
+    Serial.println("\nGNSS:");
+    if (!gnss.begin())
+    {
         Serial.println("GNSS UNAVAILABLE");
-    };
-
-    Serial.println("\n-----------\nSETUP ENDED\n-----------\n\n-------------------------------------------\n\n");
+    }
 }
 
-void loop()
+void sensorDebug()
 {
-    // GNSS_SERIAL.write(0x55); // arbitrary test byte
-    // delay(500);
-    // while (GNSS_SERIAL.available())
-    // {
-    //     Serial.println(GNSS_SERIAL.read(), HEX);
-    // }
-    // while (GNSS_SERIAL.available())
-    // {
-    //     uint8_t b = GNSS_SERIAL.read();
-    //     if (b < 0x10)
-    //         Serial.print("0");
-    //     Serial.print(b, HEX);
-    //     Serial.print(" ");
-    // }
-    // Serial.println();
-    // Serial3.write(0x55); // arbitrary test byte
-    // delay(500);
-    // while (Serial3.available())
-    // {
-    //     Serial.println(Serial3.read(), HEX);
-    // }
-
     Serial.print("Loop: ");
     Serial.println(loopCount);
     Serial.println("\n1. Altimeter Health Check:");
@@ -137,10 +113,10 @@ void loop()
     Serial.println("\n---\n");
 
     // ---- IMU ----
-    
+
     Serial.println("2. IMU Health Check:");
     printStatus(imu.checkHealth());
-    
+
     Imu::RawSample raw = imu.getRawSample();
     Serial.println("\nIMU Raw Sample:");
     Serial.print("  accel raw: ");
@@ -193,6 +169,49 @@ void loop()
     gnss_data.print();
 
     Serial.println("\n-------------------------------------------\n");
-
-    delay(1000);
 }
+
+void setup()
+{
+    wakeUp();
+
+    Serial.println("\n\n--------------\nEntered Setup!\n--------------\n");
+
+    sensorStartup();
+
+    Serial.println("\n-----------\nSETUP ENDED\n-----------\n\n-------------------------------------------\n\n");
+}
+
+void loop()
+{
+    unsigned long now = millis();
+
+    
+}
+
+/*
+CODE SCRAPS
+loop:
+    // GNSS_SERIAL.write(0x55); // arbitrary test byte
+    // delay(500);
+    // while (GNSS_SERIAL.available())
+    // {
+    //     Serial.println(GNSS_SERIAL.read(), HEX);
+    // }
+    // while (GNSS_SERIAL.available())
+    // {
+    //     uint8_t b = GNSS_SERIAL.read();
+    //     if (b < 0x10)
+    //         Serial.print("0");
+    //     Serial.print(b, HEX);
+    //     Serial.print(" ");
+    // }
+    // Serial.println();
+    // Serial3.write(0x55); // arbitrary test byte
+    // delay(500);
+    // while (Serial3.available())
+    // {
+    //     Serial.println(Serial3.read(), HEX);
+    // }
+
+*/

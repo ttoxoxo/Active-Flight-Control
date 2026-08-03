@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "imu.h"
+#include "config.h"
 
 Imu::Imu()
     : imu(), status(SensorStatus::UNINITIALIZED), consecutiveFailures(0), consecutiveSuccesses(0)
@@ -10,14 +11,14 @@ Imu::Imu()
 };
 
 bool Imu::begin() {
-    bool ok = imu.begin(LSM6DSO_IMU_ADDRESS, Wire);
+    bool ok = imu.begin(LSM6DSO_IMU_ADDRESS, IMU_WIRE);
     status = ok ? SensorStatus::NOMINAL : SensorStatus::FAILED;
     return ok;
 };
 
 SensorStatus Imu::checkHealth() {
-    Wire.beginTransmission(LSM6DSO_IMU_ADDRESS);
-    bool ack = (Wire.endTransmission() == 0);
+    IMU_WIRE.beginTransmission(LSM6DSO_IMU_ADDRESS);
+    bool ack = (IMU_WIRE.endTransmission() == 0);
 
     if(ack) {
         consecutiveFailures = 0;
