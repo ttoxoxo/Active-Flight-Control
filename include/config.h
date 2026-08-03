@@ -4,6 +4,9 @@ pin defs, constants, baud rates, PID gains
 
 #pragma once
 
+// Inlines make it so that these constexpr are only created once and available in all translation units - generally not a problem, 
+// but if these values are sent as references, could lead to weird differing state issues
+
 // GPS
 inline constexpr HardwareSerial &GNSS_SERIAL = Serial7; // Serial7: TX7=29, RX7=28
 inline constexpr int BOOT_SEQ_DELAY = 5000; // in ms

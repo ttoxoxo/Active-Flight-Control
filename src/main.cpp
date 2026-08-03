@@ -31,6 +31,12 @@ constexpr unsigned long PRINT_INTERVAL_MS = 1000; // debug cadence, independent 
 
 void wakeUp()
 {
+    // Setting Radio mode pins to 0 to boot into normal mode - connection to software means it is configurable in the future
+    pinMode(22, OUTPUT);
+    digitalWrite(22, LOW); // M0
+    pinMode(23, OUTPUT);
+    digitalWrite(23, LOW); // M1
+
     Serial.begin(DEBUG_BAUD);
     GNSS_SERIAL.begin(GNSS_BAUD);
     RADIO_SERIAL.begin(RADIO_BAUD);
