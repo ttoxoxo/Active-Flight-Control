@@ -11,12 +11,10 @@ Handles IMU interaction stuff directly with declarations to make stuff public
 
 #define LSM6DSO_IMU_ADDRESS 0x6A   // can be 0x6A with a specific hardware setup
 
-class Imu 
-{
+class Imu {
     public:
         // One-shot raw register readout for logging, calibration, and sanity checks.
-        struct RawSample
-        {
+        struct RawSample {
             std::int16_t accelX;
             std::int16_t accelY;
             std::int16_t accelZ;
@@ -27,16 +25,14 @@ class Imu
         };
 
         // Generic 3-axis container used for acceleration and angular-rate vectors.
-        struct Vector3
-        {
+        struct Vector3 {
             float x;
             float y;
             float z;
         };
 
         // Coherent converted sample for flight-control loops and telemetry packets.
-        struct MotionSample
-        {
+        struct MotionSample {
             Vector3 accelG;
             Vector3 gyroDps;
             float temperatureC;
@@ -129,5 +125,4 @@ class Imu
         // Detects readings close to configured sensor limits so saturation can be flagged.
         bool isAccelNearLimit(float marginG = 0.5F);
         bool isGyroNearLimit(float marginDps = 50.0F);
-
 };

@@ -8,12 +8,10 @@ Handles reading directly from the GPS with declarations to make stuff public
 
 #include <SparkFun_u-blox_GNSS_v3.h>
 
-
 #include "sensor_universal.h"
 #include "config.h"
 
-struct GnssData
-{
+struct GnssData {
     // Position
     double latitude;   // degrees
     double longitude;  // degrees
@@ -37,10 +35,8 @@ struct GnssData
     uint32_t timeOfWeekMs;
     bool valid;
 
-    void print() const
-    {
-        if (valid)
-        {
+    void print() const {
+        if (valid) {
             Serial.println("--- GNSS Data ---");
 
             // Position (Access members directly)
@@ -83,9 +79,7 @@ struct GnssData
             Serial.println(timeOfWeekMs);
 
             Serial.println("-----------------");
-        }
-        else
-        {
+        } else {
             Serial.println("GNSS Data: INVALID");
         }
     }

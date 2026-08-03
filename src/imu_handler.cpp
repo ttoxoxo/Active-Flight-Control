@@ -5,33 +5,28 @@
 #include "imu.h"
 
 Imu::Imu()
-    : imu(), status(SensorStatus::UNINITIALIZED), consecutiveSuccesses(0), consecutiveFailures(0)
+    : imu(), status(SensorStatus::UNINITIALIZED), consecutiveFailures(0), consecutiveSuccesses(0)
 {
 };
 
-bool Imu::begin()
-{
+bool Imu::begin() {
     bool ok = imu.begin(LSM6DSO_IMU_ADDRESS, Wire);
     status = ok ? SensorStatus::NOMINAL : SensorStatus::FAILED;
     return ok;
 };
 
-SensorStatus Imu::checkHealth()
-{
+SensorStatus Imu::checkHealth() {
     Wire.beginTransmission(LSM6DSO_IMU_ADDRESS);
     bool ack = (Wire.endTransmission() == 0);
 
-    if(ack)
-    {
+    if(ack) {
         consecutiveFailures = 0;
         consecutiveSuccesses++;
         if (consecutiveSuccesses >= FULL_RECOVERY_THRESHOLD)
             status = SensorStatus::NOMINAL;
         else if (consecutiveSuccesses >= RECOVERY_THRESHOLD)
             status = SensorStatus::DEGRADED;
-    }
-    else
-    {
+    } else {
         consecutiveSuccesses = 0;
         consecutiveFailures++;
         if (status != SensorStatus::FAILED && consecutiveFailures >= DEGRADE_THRESHOLD)
@@ -44,48 +39,39 @@ SensorStatus Imu::checkHealth()
 
 };
 
-SensorStatus Imu::getStatus() const
-{
+SensorStatus Imu::getStatus() const {
     return status;
 }
 
-std::int16_t Imu::getRawAccelX()
-{
+std::int16_t Imu::getRawAccelX() {
     return imu.readRawAccelX();
 }
 
-std::int16_t Imu::getRawAccelY()
-{
+std::int16_t Imu::getRawAccelY() {
     return imu.readRawAccelY();
 }
 
-std::int16_t Imu::getRawAccelZ()
-{
+std::int16_t Imu::getRawAccelZ() {
     return imu.readRawAccelZ();
 }
 
-std::int16_t Imu::getRawGyroX()
-{
+std::int16_t Imu::getRawGyroX() {
     return imu.readRawGyroX();
 }
 
-std::int16_t Imu::getRawGyroY()
-{
+std::int16_t Imu::getRawGyroY() {
     return imu.readRawGyroY();
 }
 
-std::int16_t Imu::getRawGyroZ()
-{
+std::int16_t Imu::getRawGyroZ() {
     return imu.readRawGyroZ();
 }
 
-std::int16_t Imu::getRawTemperature()
-{
+std::int16_t Imu::getRawTemperature() {
     return imu.readRawTemp();
 }
 
-Imu::RawSample Imu::getRawSample()
-{
+Imu::RawSample Imu::getRawSample() {
     return {
         getRawAccelX(),
         getRawAccelY(),
@@ -97,23 +83,19 @@ Imu::RawSample Imu::getRawSample()
     };
 }
 
-float Imu::getAccelXG()
-{
+float Imu::getAccelXG() {
     return imu.readFloatAccelX();
 }
 
-float Imu::getAccelYG()
-{
+float Imu::getAccelYG() {
     return imu.readFloatAccelY();
 }
 
-float Imu::getAccelZG()
-{
+float Imu::getAccelZG() {
     return imu.readFloatAccelZ();
 }
 
-Imu::Vector3 Imu::getAccelG()
-{
+Imu::Vector3 Imu::getAccelG() {
     return {
         getAccelXG(),
         getAccelYG(),
@@ -121,29 +103,24 @@ Imu::Vector3 Imu::getAccelG()
     };
 }
 
-float Imu::getAccelMagnitudeG()
-{
+float Imu::getAccelMagnitudeG() {
     Vector3 accel = getAccelG();
     return std::sqrt((accel.x * accel.x) + (accel.y * accel.y) + (accel.z * accel.z));
 }
 
-float Imu::getGyroXDps()
-{
+float Imu::getGyroXDps() {
     return imu.readFloatGyroX();
 }
 
-float Imu::getGyroYDps()
-{
+float Imu::getGyroYDps() {
     return imu.readFloatGyroY();
 }
 
-float Imu::getGyroZDps()
-{
+float Imu::getGyroZDps() {
     return imu.readFloatGyroZ();
 }
 
-Imu::Vector3 Imu::getGyroDps()
-{
+Imu::Vector3 Imu::getGyroDps() {
     return {
         getGyroXDps(),
         getGyroYDps(),
@@ -151,24 +128,20 @@ Imu::Vector3 Imu::getGyroDps()
     };
 }
 
-float Imu::getGyroMagnitudeDps()
-{
+float Imu::getGyroMagnitudeDps() {
     Vector3 gyro = getGyroDps();
     return std::sqrt((gyro.x * gyro.x) + (gyro.y * gyro.y) + (gyro.z * gyro.z));
 }
 
-float Imu::getTemperatureC()
-{
+float Imu::getTemperatureC() {
     return imu.readTempC();
 }
 
-float Imu::getTemperatureF()
-{
+float Imu::getTemperatureF() {
     return imu.readTempF();
 }
 
-Imu::MotionSample Imu::getMotionSample()
-{
+Imu::MotionSample Imu::getMotionSample() {
     Vector3 accel = getAccelG();
     Vector3 gyro = getGyroDps();
 
@@ -181,28 +154,23 @@ Imu::MotionSample Imu::getMotionSample()
     };
 }
 
-std::uint8_t Imu::getDataReadyFlags()
-{
+std::uint8_t Imu::getDataReadyFlags() {
     return imu.listenDataReady();
 }
 
-bool Imu::isAccelDataReady()
-{
+bool Imu::isAccelDataReady() {
     return (getDataReadyFlags() & ACCEL_DATA_READY) != 0;
 }
 
-bool Imu::isGyroDataReady()
-{
+bool Imu::isGyroDataReady() {
     return (getDataReadyFlags() & GYRO_DATA_READY) != 0;
 }
 
-bool Imu::isTemperatureDataReady()
-{
+bool Imu::isTemperatureDataReady() {
     return (getDataReadyFlags() & TEMP_DATA_READY) != 0;
 }
 
-bool Imu::configureForFlight(std::uint8_t accelRangeG, std::uint16_t gyroRangeDps, std::uint16_t sampleRateHz)
-{
+bool Imu::configureForFlight(std::uint8_t accelRangeG, std::uint16_t gyroRangeDps, std::uint16_t sampleRateHz) {
     bool ok = true;
     ok = imu.setAccelRange(accelRangeG) && ok;
     ok = imu.setGyroRange(gyroRangeDps) && ok;
@@ -218,15 +186,12 @@ bool Imu::configureForFlight(std::uint8_t accelRangeG, std::uint16_t gyroRangeDp
     return ok;
 }
 
-bool Imu::isAccelNearLimit(float marginG)
-{
+bool Imu::isAccelNearLimit(float marginG) {
     float limit = imu.getAccelRange();
     return getAccelMagnitudeG() >= (limit - marginG);
 }
 
-bool Imu::isGyroNearLimit(float marginDps)
-{
+bool Imu::isGyroNearLimit(float marginDps) {
     float limit = imu.getGyroRange();
     return getGyroMagnitudeDps() >= (limit - marginDps);
 }
-

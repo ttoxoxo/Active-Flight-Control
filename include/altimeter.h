@@ -10,9 +10,7 @@ altimeter stuff
 
 #include "sensor_universal.h"
 
-
-
-class Altimeter
+class Altimeter 
 {
     private:
         // Sensor
@@ -34,7 +32,7 @@ class Altimeter
         // Method declarations
         bool begin();
         SensorStatus checkHealth();
-        SensorStatus getStatus() const; 
+        SensorStatus getStatus() const;
 
         // getters
         float getTemperature();
