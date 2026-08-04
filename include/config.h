@@ -4,6 +4,8 @@ pin defs, constants, baud rates, PID gains
 
 #pragma once
 
+#include "Wire.h"
+
 // Inlines make it so that these constexpr are only created once and available in all translation units - generally not a problem, 
 // but if these values are sent as references, could lead to weird differing state issues
 
