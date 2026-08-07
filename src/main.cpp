@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <cmath>
+#include "LittleFS.h"
 
 #include "config.h"
 #include "altimeter.h"
@@ -7,6 +8,9 @@
 #include "gnss.h"
 
 // Globals
+LittleFS_QSPI myfs; // for flash unit test
+// ADD VERSIONING HERE
+
 // Objects/Structs
 Altimeter alti = Altimeter();
 Imu imu = Imu();
@@ -21,13 +25,15 @@ float rawPressurePa;
 float pressurehPa;
 
 // General Servicing
+// // Timing State for sensors and loops
 unsigned long loopCount = 0;
-// // Timing State
+
 unsigned long lastSensorTick = 0;
 unsigned long lastPrintTime = 0;
 constexpr unsigned long SENSOR_TICK_MS = 20; // ~50Hz — comfortably faster than GNSS's 10Hz output,
                                              // fast enough to drain GNSS_SERIAL before it backs up, slow enough that threshold tuning stays sane
 constexpr unsigned long PRINT_INTERVAL_MS = 1000; // debug cadence, independent of sensor servicing
+   
 
 void wakeUp()
 {
